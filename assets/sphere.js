@@ -9,13 +9,12 @@
   var sphereActive = false;
 
   var DEFAULT_IMAGES = [
-    "images/anh/anh1.jpg",
-      "images/anh/anh2.jpg",
-      "images/anh/anh3.jpg",
-      "images/anh/anh4.jpg",
-      "images/anh/anh5.jpg",
-      "images/anh/anh6.jpg",
-      "images/anh/anh7.jpg"
+    "images/anh/1792249510527_498492874585012897_8132075415164140944_f776cca49ef785473842dcbceaae0f55.jpg",
+    "images/anh/1792519421097_498492874585012897_8132075415164140944_372ba039c4ebff17ed2ffd2294fcaf6e.jpg",
+    "images/anh/1792525705309_498492874585012897_8132075415164140944_3bd29a05a68698ac6ed8d7c24697d887.jpg",
+    "images/anh/1792519515385_498492874585012897_8132075415164140944_2f28fbef61eee7bd9d0ad96536cf36a2.jpg",
+    "images/anh/1792520744886_498492874585012897_8132075415164140944_0e503b84e9ee7f2f4505f124b577d522.jpg",
+    "images/anh/1792520774791_498492874585012897_8132075415164140944_bda86407eedb86a68f8099a050b7b52e.jpg"
   ];
 
   function normalizeImage(url, size) {
@@ -393,15 +392,7 @@
         container.classList.add("active");
       });
     }
-    // Ẩn cảnh chữ/ảnh xoay để thấy rõ quả cầu (audio đã nằm ngoài nên không bị dừng)
-    var galaxy = document.getElementById("galaxy-scene");
-    if (galaxy) {
-      galaxy.style.visibility = "hidden";
-      galaxy.style.pointerEvents = "none";
-    }
-    var effectBtn = document.getElementById("love-letter-btn");
-    if (effectBtn) effectBtn.hidden = true;
-    // Đảm bảo nhạc vẫn chạy khi vào quả cầu
+    // Đảm bảo nhạc vẫn chạy khi vào quả cầu.
     var a = document.getElementById("audio");
     if (a) {
       a.loop = true;

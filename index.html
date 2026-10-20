@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Flower &amp; Khung</title>
+  <title>20-10</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
@@ -13,7 +13,7 @@
   <style>
     @font-face {
       font-family: 'Mali';
-      src: url('Mali.ttf') format('truetype');
+      src: url('./font/Mali.ttf') format('truetype');
       font-weight: normal;
       font-style: normal;
       font-display: swap;
@@ -35,15 +35,15 @@
 
   <!-- KHUNG (hiện sau khi hoa tỏa xong) -->
   <div id="content">
-    <img id="anh" src="images/anh.jpg" alt="Ảnh của bạn" hidden>
+    <img id="anh" src="images/anh/tapthe.jpg" alt="Ảnh của bạn" hidden>
 
     <div class="stage">
       <div class="frame">
         <div class="gold">
-          <div class="names"><span id="n1"></span><span class="heart">&#10084;</span><span id="n2"></span></div>
-          <div class="puzzle" id="pzwrap" title="Bấm giữ để tiếp tục"><svg id="pz" viewBox="0 0 800 600"
+          <div class="names"><span id="n1"></span><span class="heart" aria-hidden="true">✿</span><span id="n2"></span></div>
+          <div class="puzzle" id="pzwrap"><svg id="pz" viewBox="0 0 800 600"
               preserveAspectRatio="xMidYMid meet"></svg></div>
-          <div class="hold-hint" id="holdHint">Bấm giữ vào mảnh ghép trái tim</div>
+          <div class="hold-hint" id="holdHint">Nhấn vào mảnh ghép trái tim để tiếp tục</div>
           <div class="right">
             <p class="small" id="t1"></p>
             <p class="script" id="t2"></p>
@@ -173,23 +173,11 @@
 
   </div>
 
-  <!-- Nhạc nền — đặt NGOÀI galaxy-scene để không bị ẩn/dừng khi chuyển cảnh -->
+  <!-- Nhạc nền -->
   <audio id="audio" loop preload="auto">
-    <source src="./images/audio/nhac.mp3" type="audio/mpeg">
+    <source src="./images/audio/1021.MP3" type="audio/mpeg">
   </audio>
 
-  <!-- CẢNH DẢI NGÂN HÀ (churoi) — hiện sau khi bấm giữ trái tim -->
-  <div id="galaxy-scene" aria-hidden="true">
-    <canvas id="c"></canvas>
-    <h1 id="main-title"></h1>
-  </div>
-
-  <!-- Nút hiệu ứng — lớp trên cùng, ngoài galaxy-scene (icon mèo nhảy → quả cầu ảnh) -->
-  <button id="love-letter-btn" type="button" aria-label="Mở quả cầu ảnh" hidden>
-    <img id="effect-btn-img" src="./images/icon/mewmew.gif" alt="">
-  </button>
-
-  <!-- Quả cầu ảnh (CSS3D Sphere) — từ cricle -->
   <div id="sphere-container" aria-hidden="true"></div>
 
   <!-- Envelope & Letter (sau quả cầu) — từ cricle -->
@@ -239,14 +227,24 @@
           </div>
           <div class="mewmew1" aria-hidden="true"><img src="./images/icon/mewmew.gif" alt=""></div>
           <div class="mewmew2" aria-hidden="true"><img src="./images/icon/mewmew.gif" alt=""></div>
-          <div class="signature">Saphocit,<br> &#10084;</div>
+          <div class="signature">made by chatgpt,<br> &#10084;</div>
+          <button class="scene-three-btn" id="scene-three-btn" type="button" hidden>Next</button>
         </div>
       </div>
       <div class="before"></div>
     </div>
   </div>
 
-  <!-- Three.js mới (chữ/ảnh xoay) + CSS3D/Orbit (quả cầu) -->
+  <div class="scene-three-shell" id="scene-three-shell" aria-hidden="true">
+    <iframe
+      class="scene-three-frame"
+      id="scene-three-frame"
+      data-src="./scene-three/20-10.html"
+      title="Bối cảnh 3 — vòng ảnh kỷ niệm"
+      allow="autoplay"
+      loading="lazy"></iframe>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
   <script src="./assets/tween.min.js"></script>
   <script src="./assets/CSS3DRenderer.js"></script>

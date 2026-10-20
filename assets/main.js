@@ -7,6 +7,14 @@
   // ---- Galaxy particles (thay cho envelope) ----
   const N = 14000;
   let W, H, DPR, CX, CY, S;
+  const backgroundStars = Array.from({ length: 220 }, () => ({
+    x: Math.random(),
+    y: Math.random(),
+    size: Math.random() < 0.08 ? 1.8 : 0.5 + Math.random() * 0.9,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.0007 + Math.random() * 0.0018,
+    alpha: 0.25 + Math.random() * 0.6
+  }));
 
   const tx = new Float32Array(N), ty = new Float32Array(N);
   const x = new Float32Array(N), y = new Float32Array(N);
@@ -19,10 +27,10 @@
   const gauss = () => (rnd() + rnd() + rnd() - 1.5) / 1.5;
 
   const LAYERS = [
-    { n: 8, off: 0,            L: 1.00, W: 0.30, curl:  0.06, w: 0.23, hue: 0, a: 0.85 },
-    { n: 8, off: Math.PI / 8,  L: 0.82, W: 0.27, curl: -0.05, w: 0.185, hue: 0, a: 0.8 },
-    { n: 8, off: 0,            L: 0.62, W: 0.22, curl:  0.05, w: 0.15, hue: 1, a: 0.95 },
-    { n: 5, off: Math.PI / 5,  L: 0.42, W: 0.17, curl: -0.04, w: 0.11, hue: 0, a: 1.0 }
+    { n: 8, off: 0, L: 1.00, W: 0.30, curl: 0.06, w: 0.23, hue: 0, a: 0.85 },
+    { n: 8, off: Math.PI / 8, L: 0.82, W: 0.27, curl: -0.05, w: 0.185, hue: 0, a: 0.8 },
+    { n: 8, off: 0, L: 0.62, W: 0.22, curl: 0.05, w: 0.15, hue: 1, a: 0.95 },
+    { n: 5, off: Math.PI / 5, L: 0.42, W: 0.17, curl: -0.04, w: 0.11, hue: 0, a: 1.0 }
   ];
   const petalW = (u, Ww) => Ww * Math.pow(Math.sin(Math.PI * Math.pow(u, 0.7)), 0.9);
 
@@ -60,9 +68,9 @@
         const m = rnd();
         const mode = m < 0.62 ? 0 : m < 0.84 ? 1 : 2;
         [px, py] = petalPoint(Ly, mode);
-        if (mode === 0)      { h = Ly.hue; al = Ly.a * (0.6 + rnd() * 0.4); j = 0.0045; }
-        else if (mode === 1) { h = 1;      al = 0.10 + rnd() * 0.14;        j = 0.0; }
-        else                 { h = Ly.hue; al = 0.35 + rnd() * 0.3;         j = 0.003; }
+        if (mode === 0) { h = Ly.hue; al = Ly.a * (0.6 + rnd() * 0.4); j = 0.0045; }
+        else if (mode === 1) { h = 1; al = 0.10 + rnd() * 0.14; j = 0.0; }
+        else { h = Ly.hue; al = 0.35 + rnd() * 0.3; j = 0.003; }
       } else if (g < 0.735) {
         const th = rnd() * TAU, r = 0.18 + Math.pow(rnd(), 1.6) * 0.55;
         px = Math.cos(th) * r; py = Math.sin(th) * r;
@@ -160,7 +168,7 @@
   let canSecondClick = false; // chặn click lọt từ lần 1
   const COLORS = ["rgba(236,228,255,", "rgba(170,120,255,", "rgba(255,236,170,"];
   const easeOut = t => 1 - (1 - t) * (1 - t);
-  const easeIn  = t => t * t;
+  const easeIn = t => t * t;
 
   function startBurst() {
     galaxyFade = true;
@@ -201,7 +209,7 @@
       audio.currentTime = 0;
       audio.loop = true; // lặp lại
       const p = audio.play();
-      if (p && typeof p.catch === "function") p.catch(function () {});
+      if (p && typeof p.catch === "function") p.catch(function () { });
     }
 
     setTimeout(() => {
@@ -237,6 +245,19 @@
     if (state === "done") return;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     ctx.clearRect(0, 0, W, H);
+
+    // Distant stars behind the flower-shaped galaxy.
+    ctx.globalCompositeOperation = "lighter";
+    for (const star of backgroundStars) {
+      const twinkle = 0.55 + 0.45 * Math.sin(now * star.speed + star.phase);
+      ctx.globalAlpha = star.alpha * twinkle;
+      ctx.fillStyle = star.size > 1.5 ? "#d9f5ff" : "#c9d5ff";
+      ctx.beginPath();
+      ctx.arc(star.x * W, star.y * H, star.size, 0, TAU);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
 
     // Galaxy flower
     let gAlpha = 1;
@@ -327,10 +348,10 @@ window.initKhung = function () {
   var $ = function (id) { return document.getElementById(id) };
 
   var CONFIG = {
-    n1: "Anh", n2: "Em",
+    n1: "Vân ✿ My", n2: "Dương ✿ Phương",
     date: "2026-10-20",
-    t1: "",
-    t2: "Happy Woman's Day",
+    t1: "Gửi hội bạn thân",
+    t2: "Mừng ngày 20/10",
     led: "#ffc878",
     zoom: 1, offX: 0, offY: 0
   };
@@ -346,8 +367,7 @@ window.initKhung = function () {
 
   var pieceCount = 0;
   var assembled = false;
-  var holdTimer = null;
-  var HOLD_MS = 650;
+  var isOpeningGalaxy = false;
 
   function countPieces() {
     var n = 0, i, j;
@@ -355,20 +375,14 @@ window.initKhung = function () {
     return n;
   }
 
-  function showHoldHintBriefly() {
-    var hint = $("holdHint");
-    if (!hint) return;
-    hint.classList.add("show");
-    // Hiện ~1.35s rồi mất
-    setTimeout(function () {
-      hint.classList.remove("show");
-    }, 1350);
-  }
-
   function onAssembleDone() {
     if (assembled) return;
     assembled = true;
-    showHoldHintBriefly();
+    var hint = $("holdHint");
+    if (hint) {
+      hint.classList.add("show");
+      setTimeout(function () { hint.classList.remove("show"); }, 1350);
+    }
   }
 
   function shuffle() {
@@ -441,591 +455,34 @@ window.initKhung = function () {
   if (el.complete) start();
   setTimeout(start, 1500);
 
-  // ---- Bấm giữ vào trái tim → chuyển sang churoi.html ----
-  var pz = $("pzwrap");
-  function clearHold() {
-    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
-    pz.classList.remove("holding");
-  }
-  function beginHold(e) {
-    if (!assembled) return;
-    if (e && e.cancelable) e.preventDefault();
-    pz.classList.add("holding");
-    clearTimeout(holdTimer);
-    holdTimer = setTimeout(function () {
-      holdTimer = null;
-      // Fade khung → hiện cảnh dải ngân hà (cùng trang, không đổi tab)
-      var content = document.getElementById("content");
-      if (content) {
-        content.style.transition = "opacity .5s ease";
-        content.style.opacity = "0";
-      }
-      setTimeout(function () {
-        if (content) {
-          content.style.display = "none";
-          content.style.pointerEvents = "none";
-        }
-        if (typeof window.initChuroi === "function") window.initChuroi();
-      }, 500);
-    }, HOLD_MS);
-  }
-  pz.addEventListener("mousedown", beginHold);
-  pz.addEventListener("touchstart", beginHold, { passive: false });
-  pz.addEventListener("mouseup", clearHold);
-  pz.addEventListener("mouseleave", clearHold);
-  pz.addEventListener("touchend", clearHold);
-  pz.addEventListener("touchcancel", clearHold);
-  // Bỏ click shuffle — tránh xung đột với bấm giữ
-};
-
-
-/* ===== CẢNH DẢI NGÂN HÀ (từ churoi) — cùng trang ===== */
-window.initChuroi = function () {
-  if (window._churoiStarted) return;
-  window._churoiStarted = true;
-
-  const sceneEl = document.getElementById("galaxy-scene");
-  if (!sceneEl) return;
-  sceneEl.classList.add("active");
-  sceneEl.setAttribute("aria-hidden", "false");
-
-  // Giữ nhạc khi vào chữ xoay / dải ngân hà
-  (function ensureMusicPlaying() {
-    var a = document.getElementById("audio");
-    if (!a) return;
-    a.loop = true;
-    if (a.paused) {
-      var p = a.play();
-      if (p && typeof p.catch === "function") p.catch(function () {});
+  var puzzle = $("pzwrap");
+  function openNextScene() {
+    if (!assembled || isOpeningGalaxy) return;
+    if (typeof window.openSphereGallery !== "function") {
+      console.error("Photo sphere gallery is unavailable.");
+      return;
     }
-  })();
-
-  const DEFAULTS = {
-    anhNut: "images/icon/mewmew.gif",
-    titulo: "",
-    frases: [
-      " Như bông hoa tím, anh luôn ngưỡng mộ em",
-      " Cảm ơn em vì luôn là bình yên của anh",
-      " Ở bên em, điều giản dị cũng tỏa sáng",
-      " Hôm nay, sắc tím mang tên em",
-      " Bông hoa này nhắc nhở em tuyệt vời nhường nào",
-      " Tình cảm của em là nơi anh trân trọng nhất",
-      " 20 tháng 10, luôn bên em",
-      " Một đóa hoa tím cho người thắp sáng ngày của anh",
-      " Cảm ơn em vì đã luôn ở lại"
-    ],
-    fotos: [
-      "images/anh/anh1.jpg",
-      "images/anh/anh2.jpg",
-      "images/anh/anh3.jpg",
-      "images/anh/anh4.jpg",
-      "images/anh/anh5.jpg"
-    ],
-    // Đường dẫn nhạc: chỉ cần sửa chỗ này (file mp3 của bạn)
-    musica: "./images/audio/nhac.mp3"
-  };
-  const CONFIG = DEFAULTS;
-
-  const titleEl = document.getElementById("main-title");
-  if (titleEl) titleEl.textContent = CONFIG.titulo || "";
-
-  const effectImg = document.getElementById("effect-btn-img");
-  const effectBtn = document.getElementById("love-letter-btn");
-  if (effectBtn) {
-    effectBtn.hidden = false; // hiện nút lớp trên cùng
-    effectBtn.style.zIndex = "2147483647";
-  }
-  if (effectImg) {
-    effectImg.onerror = function () {
-      effectImg.style.display = "none";
-      if (effectBtn) effectBtn.classList.add("no-img");
-    };
-    effectImg.src = CONFIG.anhNut;
-    // Nếu đã lỗi cache sẵn
-    if (effectImg.complete && effectImg.naturalWidth === 0) {
-      effectImg.style.display = "none";
-      if (effectBtn) effectBtn.classList.add("no-img");
+    isOpeningGalaxy = true;
+    var content = document.getElementById("content");
+    if (content) {
+      content.style.transition = "opacity .5s ease";
+      content.style.opacity = "0";
     }
-  }
-
-  // Không gọi audio.load() ở đây — tránh dừng nhạc đang phát từ lúc hoa rơi
-  // Đường dẫn nhạc đã set sẵn trong HTML / CONFIG.musica
-  const audio = document.getElementById("audio");
-  if (audio) {
-    const src = audio.querySelector("source");
-    if (src && CONFIG.musica && src.getAttribute("src") !== CONFIG.musica) {
-      // Chỉ đổi src khi khác (và chưa phát) — không reload khi đang nghe
-      if (audio.paused) {
-        src.src = CONFIG.musica;
-        audio.load();
-      }
-    }
-    audio.loop = true; // luôn lặp suốt toàn bộ trải nghiệm
-  }
-
-  let vanishTarget = 0, vanish = 0;
-  function playCustomEffect() {
-    vanishTarget = vanishTarget ? 0 : 1;
-    if (titleEl) titleEl.classList.toggle("fade-out", vanishTarget === 1);
-    spawnBurst();
-  }
-  // Icon mèo / click chữ-ảnh xoay:
-  // 1) Chạy hết hiệu ứng kết thúc (burst + chữ/ảnh tỏa biến mất)
-  // 2) Sau đó mới hiện quả cầu ảnh
-  // 3) Phần sau quả cầu (envelope → thư) giữ nguyên như cricle
-  var goingToSphere = false;
-  var vanishSpeed = 1 / 240; // mặc định ~4s; khi đi sang cầu sẽ nhanh hơn
-  function ensureMusicPlaying() {
-    var a = document.getElementById("audio");
-    if (!a) return;
-    a.loop = true;
-    if (a.paused) {
-      var p = a.play();
-      if (p && typeof p.catch === "function") p.catch(function () {});
-    }
-  }
-
-  function goToSphere() {
-    if (goingToSphere) return;
-    if (window.isSphereActive && window.isSphereActive()) return;
-    goingToSphere = true;
-
-    // Giữ nhạc khi chuyển sang quả cầu
-    ensureMusicPlaying();
-
-    // Hiệu ứng kết thúc: chữ/ảnh tỏa + quả cầu đen giữa biến mất
-    vanishTarget = 1;
-    vanishSpeed = 1 / 90; // ~1.5s thay vì ~4s
-    if (titleEl) titleEl.classList.add("fade-out");
-    spawnBurst();
-
-    // Mở quả cầu ảnh ngay khi hiệu ứng gần xong (~1.2s)
     setTimeout(function () {
-      ensureMusicPlaying();
-      if (typeof window.openSphereGallery === "function") {
-        window.openSphereGallery();
+      if (content) {
+        content.style.display = "none";
+        content.style.pointerEvents = "none";
       }
-    }, 1200);
+      window.openSphereGallery();
+    }, 500);
   }
-  if (effectBtn) {
-    effectBtn.addEventListener("click", function (e) {
+  puzzle.setAttribute("role", "button");
+  puzzle.setAttribute("tabindex", "0");
+  puzzle.addEventListener("click", openNextScene);
+  puzzle.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      e.stopPropagation();
-      goToSphere();
-    });
-  }
-
-  if (typeof THREE === "undefined") {
-    console.error("Three.js chưa load");
-    return;
-  }
-
-  const canvas = document.getElementById("c");
-  const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(innerWidth, innerHeight);
-  // Trong suốt — lộ nền galaxy + hiệu ứng từ cricle (effects-overlay)
-  renderer.setClearColor(0x000000, 0);
-  const scene = new THREE.Scene();
-  scene.background = null;
-  const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 5000);
-  let targetDist = 390, currentDist = 390, rotX = 0.2, rotY = 0;
-
-  (function makeStars(count, spread) {
-    count = count || 2000; spread = spread || 3000;
-    const g = new THREE.BufferGeometry();
-    const pos = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const r = spread * (0.3 + Math.random() * 0.7);
-      const th = Math.random() * Math.PI * 2;
-      const ph = Math.acos(2 * Math.random() - 1);
-      pos[i * 3] = r * Math.sin(ph) * Math.cos(th);
-      pos[i * 3 + 1] = r * Math.cos(ph);
-      pos[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
+      openNextScene();
     }
-    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size: 1.5, color: 0xffffff, depthWrite: false })));
-  })();
-
-  const coreMat = new THREE.MeshPhongMaterial({ color: 0x0c0618, transparent: true, opacity: 0.92, shininess: 30 });
-  const core = new THREE.Mesh(new THREE.SphereGeometry(20, 64, 64), coreMat);
-  scene.add(core);
-  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-  const pLight = new THREE.PointLight(0xff99cc, 1.2, 800);
-  pLight.position.set(0, 40, 80);
-  scene.add(pLight);
-
-  const GLOW_BASE = 181;
-  function makeGlow(size, c1, c2) {
-    size = size || 768; c1 = c1 || "255,153,204"; c2 = c2 || "242,102,181";
-    const c = document.createElement("canvas"); c.width = c.height = size;
-    const g = c.getContext("2d");
-    const grad = g.createRadialGradient(size / 2, size / 2, size * 0.05, size / 2, size / 2, size * 0.5);
-    grad.addColorStop(0, "rgba(" + c1 + ",0.55)");
-    grad.addColorStop(0.5, "rgba(" + c2 + ",0.25)");
-    grad.addColorStop(1, "rgba(0,0,0,0)");
-    g.fillStyle = grad; g.fillRect(0, 0, size, size);
-    return new THREE.CanvasTexture(c);
-  }
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeGlow(), transparent: true, depthWrite: false }));
-  glow.scale.set(GLOW_BASE, GLOW_BASE, 1);
-  scene.add(glow);
-
-  function ringTexture(size) {
-    size = size || 1024;
-    const c = document.createElement("canvas"); c.width = c.height = size;
-    const g = c.getContext("2d"); g.translate(size / 2, size / 2);
-    const rInner = size * 0.205, rOuter = size * 0.49;
-    const grd = g.createRadialGradient(0, 0, rInner, 0, 0, rOuter);
-    grd.addColorStop(0.00, "rgba(255,230,242,1)");
-    grd.addColorStop(0.30, "rgba(255,153,204,1)");
-    grd.addColorStop(0.65, "rgba(230,77,155,0.95)");
-    grd.addColorStop(1.00, "rgba(217,54,139,0.85)");
-    g.fillStyle = grd;
-    g.beginPath(); g.arc(0, 0, rOuter, 0, Math.PI * 2); g.arc(0, 0, rInner, 0, Math.PI * 2, true); g.closePath(); g.fill();
-    for (let i = 0; i < 26; i++) {
-      const r = rInner + (rOuter - rInner) * (i / 25);
-      g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2);
-      g.lineWidth = (rOuter - rInner) / 26 * (0.55 + Math.random() * 0.35);
-      g.strokeStyle = (i % 3 === 0) ? "rgba(100,20,60,0.20)" : "rgba(240,225,255,0.16)";
-      g.stroke();
-    }
-    return new THREE.CanvasTexture(c);
-  }
-  const ring = new THREE.Mesh(
-    new THREE.RingGeometry(21, 58, 160),
-    new THREE.MeshBasicMaterial({ map: ringTexture(), transparent: true, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, opacity: 1 })
-  );
-  ring.rotation.x = Math.PI / 2;
-  scene.add(ring);
-
-  const FLOWER_PARTICLES = 2400, FLOWER_R = 74;
-  const flowerPositions = new Float32Array(FLOWER_PARTICLES * 3);
-  const flowerColors = new Float32Array(FLOWER_PARTICLES * 3);
-  const flowerCenterColor = new THREE.Color(0xf5e9ff);
-  const flowerPetalColorA = new THREE.Color(0xcdaaff);
-  const flowerPetalColorB = new THREE.Color(0x8b4df0);
-  function rosaXY(R) {
-    if (Math.random() < 1 / 9) {
-      const a = Math.random() * Math.PI * 2, rr = 0.34 * R * Math.sqrt(Math.random());
-      return [Math.cos(a) * rr, Math.sin(a) * rr, true];
-    }
-    for (let intento = 0; intento < 40; intento++) {
-      const px = (Math.random() * 2 - 1) * R, py = (Math.random() * 2 - 1) * R;
-      const rad = Math.sqrt(px * px + py * py);
-      if (rad <= R * Math.abs(Math.cos(2.5 * Math.atan2(py, px)))) return [px, py, false];
-    }
-    return [0, 0, true];
-  }
-  for (let i = 0; i < FLOWER_PARTICLES; i++) {
-    const rp = rosaXY(FLOWER_R);
-    const px = rp[0], py = rp[1], esCentro = rp[2];
-    const rad = Math.sqrt(px * px + py * py) / FLOWER_R;
-    flowerPositions[i * 3] = px; flowerPositions[i * 3 + 1] = py;
-    flowerPositions[i * 3 + 2] = (1 - rad) * 5.5 + (Math.random() - 0.5) * 4;
-    const col = esCentro ? flowerCenterColor : flowerPetalColorA.clone().lerp(flowerPetalColorB, Math.min(1, rad));
-    flowerColors[i * 3] = col.r; flowerColors[i * 3 + 1] = col.g; flowerColors[i * 3 + 2] = col.b;
-  }
-  const SPARKLE_PARTICLES = 700;
-  const sparklePositions = new Float32Array(SPARKLE_PARTICLES * 3);
-  for (let i = 0; i < SPARKLE_PARTICLES; i++) {
-    const rp = rosaXY(FLOWER_R * 0.92);
-    sparklePositions[i * 3] = rp[0]; sparklePositions[i * 3 + 1] = rp[1];
-    sparklePositions[i * 3 + 2] = 6 + (Math.random() - 0.5) * 3;
-  }
-  function makeDotTexture(size) {
-    size = size || 64;
-    const c = document.createElement("canvas"); c.width = c.height = size;
-    const g = c.getContext("2d");
-    const grad = g.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    grad.addColorStop(0, "rgba(255,255,255,1)");
-    grad.addColorStop(0.4, "rgba(255,255,255,0.7)");
-    grad.addColorStop(1, "rgba(255,255,255,0)");
-    g.fillStyle = grad; g.fillRect(0, 0, size, size);
-    return new THREE.CanvasTexture(c);
-  }
-  const dotTex = makeDotTexture();
-  const flowerGeo = new THREE.BufferGeometry();
-  flowerGeo.setAttribute("position", new THREE.BufferAttribute(flowerPositions, 3));
-  flowerGeo.setAttribute("color", new THREE.BufferAttribute(flowerColors, 3));
-  const flowerMat = new THREE.PointsMaterial({
-    size: 6.4, map: dotTex, transparent: true, depthWrite: false,
-    blending: THREE.AdditiveBlending, vertexColors: (THREE.VertexColors !== undefined ? THREE.VertexColors : true), sizeAttenuation: true
   });
-  const flowerPoints = new THREE.Points(flowerGeo, flowerMat);
-  const sparkleGeo = new THREE.BufferGeometry();
-  sparkleGeo.setAttribute("position", new THREE.BufferAttribute(sparklePositions, 3));
-  const sparkleMat = new THREE.PointsMaterial({
-    size: 3.2, map: dotTex, color: 0xffffff, transparent: true, depthWrite: false,
-    blending: THREE.AdditiveBlending, sizeAttenuation: true, opacity: 0.9
-  });
-  const sparklePoints = new THREE.Points(sparkleGeo, sparkleMat);
-  const flowerGroup = new THREE.Group();
-  flowerGroup.add(flowerPoints); flowerGroup.add(sparklePoints);
-  flowerGroup.position.set(0, 118, 0);
-  scene.add(flowerGroup);
-  const flowerHalo = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: makeGlow(512, "255,153,204", "242,102,181"), transparent: true, depthWrite: false, opacity: 0.55
-  }));
-  flowerHalo.scale.set(260, 260, 1);
-  flowerGroup.add(flowerHalo);
-
-  const frasesBase = CONFIG.frases;
-  const WORD_SLOTS = 150;
-  const WORDS = Array.from({ length: WORD_SLOTS }, function (_, i) { return frasesBase[i % frasesBase.length]; });
-  function makeTextTexture(text, color) {
-    const c = document.createElement("canvas"); c.width = 512; c.height = 128;
-    const ctx = c.getContext("2d"); ctx.clearRect(0, 0, c.width, c.height);
-    ctx.textAlign = "center"; ctx.textBaseline = "middle";
-    ctx.fillStyle = "#fff"; ctx.shadowColor = color; ctx.shadowBlur = 30;
-    const maxWidth = c.width - 48;
-    let fontSize = 60;
-    ctx.font = fontSize + "px 'Mali', cursive";
-    while (ctx.measureText(text).width > maxWidth && fontSize > 24) {
-      fontSize -= 2;
-      ctx.font = fontSize + "px 'Mali', cursive";
-    }
-    ctx.fillText(text, c.width / 2, c.height / 2);
-    return new THREE.CanvasTexture(c);
-  }
-  const COLORS = ["#FF99CC", "#FFC2E0", "#F266B5", "#FF85C2", "#FFD6EB", "#F266B5", "#FFC2E0", "#E64D9B", "#FFADD6", "#FFB8DC"];
-  const textGroup = new THREE.Group(); scene.add(textGroup);
-  function buildWords() {
-    for (let i = 0; i < WORDS.length; i++) {
-      const tex = makeTextTexture(WORDS[i], COLORS[i % COLORS.length]);
-      const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-      const sp = new THREE.Sprite(mat);
-      sp.scale.set(78, 25, 1);
-      const phi = Math.acos(2 * Math.random() - 1), theta = Math.random() * Math.PI * 2;
-      const r = 150 + Math.random() * 120;
-      sp.position.set(r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
-      sp.userData = { phi: phi, theta: theta, radius: r, speed: 0.001 + Math.random() * 0.001 };
-      textGroup.add(sp);
-    }
-  }
-  if (document.fonts && document.fonts.load) {
-    document.fonts.load("40px 'Mali'").catch(function () {}).then(buildWords);
-  } else {
-    setTimeout(buildWords, 200);
-  }
-
-  const fotosBase = CONFIG.fotos;
-  function makePhotoSprite(url, size) {
-    const c = document.createElement("canvas"); c.width = c.height = 256;
-    const tex = new THREE.CanvasTexture(c);
-    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-    const sp = new THREE.Sprite(mat);
-    sp.scale.set(size, size, 1);
-    const img = new Image();
-    img.onload = function () {
-      const ctx = c.getContext("2d");
-      ctx.clearRect(0, 0, c.width, c.height);
-      ctx.drawImage(img, 0, 0, c.width, c.height);
-      tex.needsUpdate = true;
-      const aspect = img.naturalWidth / img.naturalHeight;
-      const aX = Math.min(1, aspect), aY = Math.min(1, 1 / aspect);
-      sp.scale.set(size * aX, size * aY, 1);
-    };
-    img.src = url;
-    return sp;
-  }
-  const FOTO_ESCALA = (/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || innerWidth < 768) ? 1.35 : 1;
-  const photoGroup = new THREE.Group(); scene.add(photoGroup);
-  for (let i = 0; i < 42; i++) {
-    const url = fotosBase[i % fotosBase.length];
-    const size = (28 + Math.random() * 20) * FOTO_ESCALA;
-    const sp = makePhotoSprite(url, size);
-    const phi = Math.acos(2 * Math.random() - 1), theta = Math.random() * Math.PI * 2;
-    const r = 140 + Math.random() * 170;
-    sp.position.set(r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
-    sp.userData = { phi: phi, theta: theta, radius: r, speed: 0.0006 + Math.random() * 0.0012 };
-    photoGroup.add(sp);
-  }
-
-  const bursts = [];
-  const BURST_COLORS = [0xffe6f2, 0xff99cc, 0xcdaaff, 0xf266b5, 0x8b4df0];
-  function spawnBurst() {
-    const N = 700, pos = new Float32Array(N * 3), col = new Float32Array(N * 3), vel = [];
-    for (let i = 0; i < N; i++) {
-      const phi = Math.acos(2 * Math.random() - 1), th = Math.random() * Math.PI * 2, sp = 0.8 + Math.random() * 4.2;
-      vel.push(sp * Math.sin(phi) * Math.cos(th), sp * Math.cos(phi), sp * Math.sin(phi) * Math.sin(th));
-      const c = new THREE.Color(BURST_COLORS[i % BURST_COLORS.length]);
-      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
-    }
-    const g = new THREE.BufferGeometry();
-    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
-    g.setAttribute("color", new THREE.BufferAttribute(col, 3));
-    const m = new THREE.PointsMaterial({
-      size: 5, map: dotTex, vertexColors: (THREE.VertexColors !== undefined ? THREE.VertexColors : true), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-    });
-    const pts = new THREE.Points(g, m); scene.add(pts);
-    const wave = new THREE.Sprite(new THREE.SpriteMaterial({
-      map: makeGlow(512, "255,230,242", "242,102,181"), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending
-    }));
-    wave.scale.set(10, 10, 1); scene.add(wave);
-    bursts.push({ pts: pts, wave: wave, vel: vel, life: 1 });
-  }
-  function updateBursts() {
-    for (let i = bursts.length - 1; i >= 0; i--) {
-      const b = bursts[i]; b.life -= 0.007;
-      if (b.life <= 0) {
-        scene.remove(b.pts); scene.remove(b.wave);
-        b.pts.geometry.dispose(); b.pts.material.dispose(); b.wave.material.dispose();
-        bursts.splice(i, 1); continue;
-      }
-      const p = b.pts.geometry.attributes.position.array;
-      for (let k = 0; k < p.length; k++) p[k] += b.vel[k];
-      b.pts.geometry.attributes.position.needsUpdate = true;
-      b.pts.material.opacity = b.life;
-      const w = (1 - b.life) * 900; b.wave.scale.set(w, w, 1); b.wave.material.opacity = b.life * 0.8;
-    }
-  }
-
-  let isPointerDown = false, startX = 0, startY = 0;
-  let targetRotX = rotX, targetRotY = rotY, velX = 0, velY = 0;
-  let pointerMoved = false;
-  let downClientX = 0, downClientY = 0;
-
-  function onDown(e) {
-    isPointerDown = true; velX = 0; velY = 0; pointerMoved = false;
-    const t = e.touches ? e.touches[0] : e;
-    startX = t.clientX; startY = t.clientY;
-    downClientX = t.clientX; downClientY = t.clientY;
-  }
-  function onMove(e) {
-    if (!isPointerDown) return;
-    if (e.touches && e.touches.length > 1) return;
-    const t = e.touches ? e.touches[0] : e;
-    const dx = t.clientX - startX, dy = t.clientY - startY;
-    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
-      pointerMoved = true;
-      const sensX = (Math.PI * 1.5) / innerWidth, sensY = (Math.PI * 0.8) / innerHeight;
-      velY = -dx * sensX; velX = dy * sensY;
-      targetRotY += velY; targetRotX = Math.max(-1.25, Math.min(1.25, targetRotX + velX));
-      startX = t.clientX; startY = t.clientY;
-    }
-  }
-  function onUp(e) {
-    if (!isPointerDown) return;
-    isPointerDown = false;
-    // Không chuyển sang quả cầu khi bấm chữ/ảnh xoay —
-    // chỉ icon mèo (love-letter-btn) mới gọi goToSphere()
-  }
-
-  const domEl = renderer.domElement;
-  domEl.addEventListener("mousedown", onDown);
-  domEl.addEventListener("mousemove", onMove);
-  addEventListener("mouseup", onUp);
-  domEl.addEventListener("touchstart", onDown, { passive: true });
-  domEl.addEventListener("touchmove", onMove, { passive: true });
-  addEventListener("touchend", onUp, { passive: true });
-  addEventListener("wheel", function (e) {
-    targetDist += e.deltaY * 0.25;
-    targetDist = Math.max(160, Math.min(600, targetDist));
-  }, { passive: true });
-
-  let pinchDist = null;
-  function getPinchDist(touches) {
-    const dx = touches[0].clientX - touches[1].clientX, dy = touches[0].clientY - touches[1].clientY;
-    return Math.hypot(dx, dy);
-  }
-  addEventListener("touchstart", function (e) {
-    if (e.touches.length === 2) { pinchDist = getPinchDist(e.touches); isPointerDown = false; }
-  }, { passive: true });
-  addEventListener("touchmove", function (e) {
-    if (e.touches.length === 2) {
-      const newDist = getPinchDist(e.touches);
-      if (pinchDist !== null) {
-        targetDist += (pinchDist - newDist) * 0.85;
-        targetDist = Math.max(160, Math.min(600, targetDist));
-      }
-      pinchDist = newDist;
-    } else if (pinchDist !== null) {
-      pinchDist = null;
-      if (e.touches.length === 1) {
-        startX = e.touches[0].clientX; startY = e.touches[0].clientY; isPointerDown = true;
-      }
-    }
-  }, { passive: true });
-  addEventListener("touchend", function (e) {
-    if (e.touches.length < 2) pinchDist = null;
-  }, { passive: true });
-
-  addEventListener("resize", function () {
-    renderer.setSize(innerWidth, innerHeight);
-    camera.aspect = innerWidth / innerHeight;
-    camera.updateProjectionMatrix();
-  });
-
-  let t = 0;
-  function tick() {
-    requestAnimationFrame(tick); t += 0.01;
-    vanish += Math.max(-vanishSpeed, Math.min(vanishSpeed, vanishTarget - vanish));
-    const e = vanish * vanish * (3 - 2 * vanish);
-    const inv = 1 - e;
-    const expand = 1 + e * 3.5;
-
-    updateBursts();
-    flowerGroup.quaternion.copy(camera.quaternion);
-    flowerPoints.rotation.z += 0.0025;
-    sparklePoints.rotation.z -= 0.004;
-
-    const flowerBreath = 1 + 0.05 * Math.sin(t * 0.6);
-    const fk = flowerBreath * expand;
-    flowerGroup.scale.set(fk, fk, 1);
-    flowerPoints.rotation.z += e * 0.12; sparklePoints.rotation.z -= e * 0.2;
-    flowerMat.opacity = (0.85 + 0.15 * Math.sin(t * 1.3)) * inv;
-    sparkleMat.opacity = (0.65 + 0.35 * Math.sin(t * 2.4)) * inv;
-    flowerHalo.material.opacity = (0.45 + 0.15 * Math.sin(t * 0.6)) * inv;
-
-    ring.rotation.z += 0.003 + e * 0.2;
-    ring.scale.setScalar(expand);
-    ring.material.opacity = inv;
-
-    const gk = GLOW_BASE * (1 + Math.sin(t * 0.4) * 0.03) * expand;
-    glow.scale.set(gk, gk, 1);
-    // Glow + quả cầu đen giữa cũng mờ dần khi tỏa
-    if (glow.material) glow.material.opacity = inv * 0.9;
-
-    const s = 1.0 + 0.05 * Math.sin(t * 3);
-    // Co nhỏ + mờ dần → biến mất (không để quả cầu đen phình to)
-    const cs = s * (1 - e * 0.95);
-    core.scale.set(cs, cs, cs);
-    coreMat.opacity = 0.92 * inv;
-    core.visible = inv > 0.02;
-
-    textGroup.children.forEach(function (sp) {
-      sp.material.opacity = (0.8 + 0.2 * Math.sin(t * 2)) * inv;
-      sp.userData.theta += sp.userData.speed * (1 + e * 12);
-      const R = sp.userData.radius * expand;
-      sp.position.x = R * Math.sin(sp.userData.phi) * Math.cos(sp.userData.theta);
-      sp.position.y = R * Math.cos(sp.userData.phi);
-      sp.position.z = R * Math.sin(sp.userData.phi) * Math.sin(sp.userData.theta);
-    });
-    photoGroup.children.forEach(function (sp) {
-      sp.material.opacity = (0.85 + 0.15 * Math.sin(t * 2 + sp.userData.radius)) * inv;
-      sp.userData.theta += sp.userData.speed * (1 + e * 12);
-      const R = sp.userData.radius * expand;
-      sp.position.x = R * Math.sin(sp.userData.phi) * Math.cos(sp.userData.theta);
-      sp.position.y = R * Math.cos(sp.userData.phi);
-      sp.position.z = R * Math.sin(sp.userData.phi) * Math.sin(sp.userData.theta);
-    });
-
-    if (!isPointerDown) {
-      velX *= 0.88; velY *= 0.88;
-      targetRotX = Math.max(-1.25, Math.min(1.25, targetRotX + velX));
-      targetRotY += velY;
-    }
-    rotX += (targetRotX - rotX) * 0.12;
-    rotY += (targetRotY - rotY) * 0.12;
-    currentDist += (targetDist - currentDist) * 0.06;
-    const cx = Math.cos(rotX), sx = Math.sin(rotX);
-    const cy = Math.cos(rotY), sy = Math.sin(rotY);
-    camera.position.set(currentDist * sy * cx, currentDist * sx, currentDist * cy * cx);
-    camera.lookAt(0, 0, 0);
-    renderer.render(scene, camera);
-  }
-  tick();
-
-  // Nhạc chỉ phát khi click lần 2 (hoa rơi) — xem startDrop() ở trên
 };

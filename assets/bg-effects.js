@@ -1,5 +1,5 @@
 /**
- * Background Effects – starfield, galaxy, snowfall, fireworks
+ * Background Effects – soft starlight, drifting flowers, and rose-gold fireworks
  * Lấy từ cricle/enhanced-effects.js, chỉ giữ phần nền
  */
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js';
@@ -7,13 +7,23 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.m
 const isMobile = window.innerWidth < 768;
 
 let scene, camera, renderer;
-let snowParticles, staticStars, galaxy;
-let snowVelocities = [];
+let staticStars, galaxy;
+const photoSprites = [];
 let fireworks = [];
 let isInitialized = false;
+let photosActive = window.__letterPhotosActive === true;
 let effectsOpacity = 1;
 let effectsStartTime = 0;
 const EFFECTS_FADE_DURATION = 800;
+
+window.setBackgroundPhotosActive = function (active) {
+    photosActive = Boolean(active);
+    window.__letterPhotosActive = photosActive;
+    for (const photo of photoSprites) {
+        if (photosActive) placePhotoAtEntry(photo, true);
+        photo.material.opacity = photosActive ? photo.userData.baseOpacity * effectsOpacity : 0;
+    }
+};
 
 function initBgEffects() {
     if (isInitialized) return;
@@ -49,7 +59,7 @@ function initBgEffects() {
 
     createStarfield();
     createGalaxy();
-    createSnowfall();
+    createPhotoField();
 
     effectsStartTime = Date.now();
     animateEffects();
@@ -58,7 +68,7 @@ function initBgEffects() {
 
 function createStarfield() {
     const vertices = [];
-    for (let i = 0; i < 8000; i++) {
+    for (let i = 0; i < 2400; i++) {
         vertices.push(
             (Math.random() - 0.5) * 2000,
             (Math.random() - 0.5) * 2000,
@@ -68,25 +78,25 @@ function createStarfield() {
     const geometry = new THREE.BufferGeometry();
     geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
     const material = new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 0.5,
+        color: 0xffd9e6,
+        size: 0.65,
         transparent: true,
-        opacity: 0.6
+        opacity: 0.45
     });
     staticStars = new THREE.Points(geometry, material);
     scene.add(staticStars);
 }
 
 function createGalaxy() {
-    const particleCount = isMobile ? 18000 : 30000;
+    const particleCount = isMobile ? 7000 : 11000;
     const vertices = [];
     const colors = [];
     const maxRadius = 80;
     const spin = 1;
 
-    const innerColor = new THREE.Color(0xfd9595);
-    const midColor = new THREE.Color(0xffb8b8);
-    const outerColor = new THREE.Color(0x9966cc);
+    const innerColor = new THREE.Color(0xffc1d2);
+    const midColor = new THREE.Color(0xf28eaa);
+    const outerColor = new THREE.Color(0xd9a86c);
 
     for (let i = 0; i < particleCount; i++) {
         const r = Math.pow(Math.random(), 1.5) * maxRadius;
@@ -104,7 +114,7 @@ function createGalaxy() {
         } else {
             color = midColor.clone().lerp(outerColor, (t - 0.5) * 2);
         }
-        const variation = 0.1;
+        const variation = 0.06;
         color.r += (Math.random() - 0.5) * variation;
         color.g += (Math.random() - 0.5) * variation;
         color.b += (Math.random() - 0.5) * variation;
@@ -116,10 +126,10 @@ function createGalaxy() {
     geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-        size: 0.12,
+        size: 0.16,
         sizeAttenuation: true,
         transparent: true,
-        opacity: 0.5,
+        opacity: 0.32,
         vertexColors: true,
         blending: THREE.AdditiveBlending,
         depthWrite: false
@@ -130,37 +140,68 @@ function createGalaxy() {
     scene.add(galaxy);
 }
 
-function createSnowfall() {
-    const snowCount = isMobile ? 5000 : 8000;
-    const snowVertices = [];
-    snowVelocities = [];
-
-    for (let i = 0; i < snowCount; i++) {
-        snowVertices.push(
-            (Math.random() - 0.5) * 200,
-            Math.random() * 200 - 50,
-            (Math.random() - 0.5) * 200
+function createPhotoField() {
+    const loader = new THREE.TextureLoader();
+    const count = isMobile ? 9 : 14;
+    const photoPaths = [
+        "./images/anh/1792249510527_498492874585012897_8132075415164140944_f776cca49ef785473842dcbceaae0f55.jpg",
+        "./images/anh/1792519421097_498492874585012897_8132075415164140944_372ba039c4ebff17ed2ffd2294fcaf6e.jpg",
+        "./images/anh/1792525705309_498492874585012897_8132075415164140944_3bd29a05a68698ac6ed8d7c24697d887.jpg",
+        "./images/anh/1792519515385_498492874585012897_8132075415164140944_2f28fbef61eee7bd9d0ad96536cf36a2.jpg",
+        "./images/anh/1792520744886_498492874585012897_8132075415164140944_0e503b84e9ee7f2f4505f124b577d522.jpg",
+        "./images/anh/1792520774791_498492874585012897_8132075415164140944_bda86407eedb86a68f8099a050b7b52e.jpg"
+    ];
+    const photoCount = photoPaths.length;
+    for (let i = 0; i < photoCount; i++) {
+        loader.load(
+            photoPaths[i],
+            (loadedTexture) => {
+                loadedTexture.colorSpace = THREE.SRGBColorSpace;
+                for (let j = i; j < count; j += photoCount) {
+                    const baseOpacity = 0.38 + Math.random() * 0.2;
+                    const material = new THREE.SpriteMaterial({
+                        map: loadedTexture,
+                        transparent: true,
+                        opacity: photosActive ? baseOpacity * effectsOpacity : 0,
+                        depthWrite: false
+                    });
+                    const photo = new THREE.Sprite(material);
+                    const height = 9 + Math.random() * 5;
+                    const aspectRatio = loadedTexture.image.width / loadedTexture.image.height;
+                    photo.scale.set(height * aspectRatio, height, 1);
+                    photo.userData = {
+                        baseOpacity,
+                        speed: 0.18 + Math.random() * 0.12,
+                        sway: Math.random() * Math.PI * 2,
+                        direction: Math.random() < 0.5 ? -1 : 1
+                    };
+                    photo.position.z = -18 + Math.random() * 34;
+                    placePhotoAtEntry(photo, true);
+                    photoSprites.push(photo);
+                    scene.add(photo);
+                }
+            },
+            undefined,
+            (error) => console.error(`Unable to load ${photoPaths[i]}.`, error)
         );
-        snowVelocities.push({
-            y: Math.random() * 0.02 + 0.01,
-            swayX: (Math.random() - 0.5) * 0.1,
-            swayZ: (Math.random() - 0.5) * 0.1,
-            freq: Math.random() * 0.5 + 0.2
-        });
     }
+}
 
-    const snowGeometry = new THREE.BufferGeometry();
-    snowGeometry.setAttribute('position', new THREE.Float32BufferAttribute(snowVertices, 3));
-    const snowMaterial = new THREE.PointsMaterial({
-        color: 0xffffff,
-        size: 0.15,
-        transparent: true,
-        opacity: 0.7,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false
-    });
-    snowParticles = new THREE.Points(snowGeometry, snowMaterial);
-    scene.add(snowParticles);
+function getPhotoTravelBounds(photo) {
+    const distance = camera.position.z - photo.position.z;
+    const halfHeight = distance * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    return { halfWidth: halfHeight * camera.aspect, halfHeight };
+}
+
+function placePhotoAtEntry(photo, stagger = false) {
+    const { halfWidth, halfHeight } = getPhotoTravelBounds(photo);
+    const direction = photo.userData.direction;
+    const margin = photo.scale.x * 0.6;
+    const entryX = -direction * (halfWidth + margin);
+    photo.position.x = stagger
+        ? entryX + direction * Math.random() * halfWidth * 1.5
+        : entryX;
+    photo.position.y = (Math.random() * 2 - 1) * halfHeight * 0.82;
 }
 
 class Firework {
@@ -178,8 +219,8 @@ class Firework {
         const geometry = new THREE.BufferGeometry();
         const positions = [];
         const velocities = [];
-        const hue = Math.random();
-        const color = new THREE.Color().setHSL(hue, 0.9, 0.6);
+        const colors = [0xffa6c1, 0xf26d96, 0xffd58a];
+        const color = new THREE.Color(colors[Math.floor(Math.random() * colors.length)]);
 
         for (let i = 0; i < particleCount; i++) {
             positions.push(position.x, position.y, position.z);
@@ -247,14 +288,14 @@ class Firework {
 }
 
 function setEffectsOpacity(opacity) {
-    if (snowParticles && snowParticles.material) {
-        snowParticles.material.opacity = 0.7 * opacity;
-    }
     if (staticStars && staticStars.material) {
-        staticStars.material.opacity = 0.6 * opacity;
+        staticStars.material.opacity = 0.45 * opacity;
     }
     if (galaxy && galaxy.material) {
-        galaxy.material.opacity = 0.35 * opacity;
+        galaxy.material.opacity = 0.32 * opacity;
+    }
+    for (const photo of photoSprites) {
+        photo.material.opacity = photosActive ? photo.userData.baseOpacity * opacity : 0;
     }
 }
 
@@ -270,26 +311,22 @@ function animateEffects() {
         setEffectsOpacity(effectsOpacity);
     }
 
-    if (snowParticles) {
-        const snowPositions = snowParticles.geometry.attributes.position.array;
-        for (let i = 0; i < snowPositions.length; i += 3) {
-            const idx = i / 3;
-            if (snowVelocities[idx]) {
-                const vel = snowVelocities[idx];
-                snowPositions[i + 1] -= vel.y;
-                snowPositions[i] += Math.sin(time * vel.freq + i) * vel.swayX * 0.1;
-                snowPositions[i + 2] += Math.cos(time * vel.freq + i) * vel.swayZ * 0.1;
-                if (snowPositions[i + 1] < -60) snowPositions[i + 1] = 100;
+    if (photosActive) {
+        for (const photo of photoSprites) {
+            const direction = photo.userData.direction;
+            photo.position.x += direction * photo.userData.speed;
+            photo.position.y += Math.sin(time + photo.userData.sway) * 0.018;
+            if (Math.abs(photo.position.x) > getPhotoTravelBounds(photo).halfWidth + photo.scale.x * 0.6) {
+                placePhotoAtEntry(photo);
             }
         }
-        snowParticles.geometry.attributes.position.needsUpdate = true;
     }
 
     if (galaxy) {
         galaxy.rotation.y += 0.0003;
     }
 
-    if (Math.random() < 0.02) {
+    if (Math.random() < 0.002) {
         fireworks.push(new Firework(scene));
     }
     for (let i = fireworks.length - 1; i >= 0; i--) {
