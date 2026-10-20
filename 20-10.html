@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#160b1d">
+  <meta name="description" content="Một món quà nhỏ dành tặng ngày Phụ nữ Việt Nam 20/10.">
+  <title>20/10 của Vân, Dương, My &amp; Phương</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/20-10-scene.css">
+</head>
+<body>
+  <canvas class="scene-canvas" id="scene-canvas" aria-label="Vòng ảnh kỷ niệm 3D"></canvas>
+  <div class="scene-glow" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="./index.html" aria-label="Trở về trang thiệp">
+      <span class="brand__flower" aria-hidden="true">✿</span>
+      <span>một món quà nhỏ</span>
+    </a>
+    <span class="date-pill"><span aria-hidden="true">✦</span> 20 THÁNG 10</span>
+  </header>
+
+  <main class="page-content">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="intro__eyebrow"><span aria-hidden="true">♡</span> VIETNAMESE WOMEN'S DAY</p>
+      <h1 id="page-title">Gửi bốn nàng,<br><em>điều dịu dàng nhất</em></h1>
+      <p class="intro__copy">Cảm ơn vì đã cùng nhau làm thế giới<br class="desktop-break"> quanh mình trở nên thật xinh đẹp.</p>
+      <span class="intro__rule" aria-hidden="true"></span>
+      <p class="intro__signature">Dành tặng: <span>Vân · Dương · My · Phương</span></p>
+    </section>
+
+    <div class="gallery-hint" aria-hidden="true">
+      <span class="gallery-hint__line"></span>
+      <span>KÉO ĐỂ XOAY KỶ NIỆM</span>
+      <span class="gallery-hint__line"></span>
+    </div>
+
+    <section class="gallery-controls" aria-label="Điều khiển vòng ảnh">
+      <button class="gallery-button" id="photo-previous" type="button" aria-label="Xoay vòng ảnh sang trái">←</button>
+      <span class="gallery-count" id="gallery-count">01 <i>/</i> 06</span>
+      <button class="gallery-button" id="photo-next" type="button" aria-label="Xoay vòng ảnh sang phải">→</button>
+    </section>
+
+    <footer class="page-footer">
+      <span class="page-footer__heart" aria-hidden="true">♥</span>
+      <span>Chúc cả bốn luôn rạng rỡ và được yêu thương</span>
+    </footer>
+  </main>
+
+  <dialog class="photo-dialog" id="photo-dialog" aria-label="Ảnh kỷ niệm">
+    <button class="photo-dialog__close" id="photo-dialog-close" type="button" aria-label="Đóng ảnh">×</button>
+    <img id="dialog-photo" alt="">
+    <p id="dialog-caption"></p>
+  </dialog>
+
+  <aside class="music-player" id="music-player" aria-label="Trình phát nhạc">
+    <div class="music-player__heading">
+      <span class="music-player__disc" aria-hidden="true">♫</span>
+      <div class="music-player__track">
+        <span class="music-player__eyebrow">NHẠC NỀN</span>
+        <span class="music-player__title" id="music-title">Chọn bài hát</span>
+      </div>
+      <button class="music-player__toggle" id="music-toggle" type="button" aria-expanded="true"
+        aria-controls="music-controls" aria-label="Thu gọn trình phát">−</button>
+    </div>
+    <div class="music-player__controls" id="music-controls">
+      <label class="music-player__selection" for="music-track">
+        <span>Bài hát</span>
+        <select id="music-track" aria-label="Chọn nhạc nền"></select>
+      </label>
+      <div class="music-player__buttons">
+        <button class="music-player__button music-player__button--play" id="music-play" type="button"
+          aria-label="Tạm dừng nhạc">Ⅱ</button>
+      </div>
+      <label class="music-player__volume" for="music-volume">
+        <span aria-hidden="true">♪</span>
+        <input id="music-volume" type="range" min="0" max="100" value="55" aria-label="Âm lượng">
+        <span id="music-volume-value">55%</span>
+      </label>
+      <p class="music-player__status" id="music-status" aria-live="polite">Đang kết nối nhạc nền…</p>
+    </div>
+  </aside>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.148.0/build/three.min.js"></script>
+  <script src="./assets/20-10-scene.js"></script>
+  <script src="./assets/music-player.js"></script>
+</body>
+</html>

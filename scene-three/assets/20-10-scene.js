@@ -35,6 +35,7 @@
   scene.add(gallery);
 
   const cards = [];
+  const cardGeometry = new THREE.PlaneGeometry(3.5, 4.38);
   const raycaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
   const clock = new THREE.Clock();
@@ -130,7 +131,7 @@
           side: THREE.DoubleSide,
           transparent: true
         });
-        const card = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 4.38), material);
+        const card = new THREE.Mesh(cardGeometry, material);
         const angle = (index / photoList.length) * Math.PI * 2;
         const radius = window.innerWidth < 760 ? 5.8 : 6.7;
         card.position.set(Math.sin(angle) * radius, Math.sin(angle * 2) * 0.26, Math.cos(angle) * radius);
